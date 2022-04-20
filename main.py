@@ -122,23 +122,33 @@ dot.node_attr['shape'] = 'circle'
 ################
 
 
-# 
+# function to convert an NFA to a DFA
 def convert_nfa_to_dfa():
+    # previously defined variables
     global statesString, startStateString, deltaString, alphabetString, finalStatesString, Q, q0, alphabet, delta, F, \
         globalOutput, var
 
+    # mapping the strings to the content of the input from the GUI
     statesString = setOfStatesInput.get()
     startStateString = startStateInput.get()
     alphabetString = alphabetInput.get()
     finalStatesString = finalStatesInput.get()
     deltaString = deltaInput.get()
 
+    # transform strings into arrays
     Q = statesString.split(',')
     q0 = startStateString
     alphabet = alphabetString.split(',')
     F = finalStatesString.split(',')
     delta = [list(line.split(',')) for line in deltaString.split('|')]
+    
+    
+    ################
+    
+   
     # Algorithm NFA to DFA
+    
+    # new arrays for current state, new transition function and new dfa states
     dfa_states = [[q0]]
     dfa_delta = []
     new_dfa_states = [[q0]]
@@ -150,38 +160,49 @@ def convert_nfa_to_dfa():
     #                                   |                  |                  |
     #                                   |                  |                  |
     #
-    #  x & y determined by the pre-defined dictionary as following
+    #  x & y determined by the pre-defined dictionary as follows
     #      delta_dict[current_state][symbol]   -> current_state could be more than one state like {A,B} so it's iterated
     #      upon all its elements
 
+    # loop over all new dfa states, row by row
     while len(new_dfa_states) > 0:
-        current_state = new_dfa_states[0]  #
-        new_dfa_states = new_dfa_states[1:]
+        current_state = new_dfa_states[0]  # current state is the first new dfa state
+        new_dfa_states = new_dfa_states[1:] # remover the first state from the new dfa state
 
         # globalOutput += print_to_string('Current state: ', current_state)
+        
+        # concatenate the current state to the global output, to be displayed in GUI
         globalOutput += 'Current state: ' + '{' + ', '.join(f'{w}' for w in current_state) + '}' + '\n'
 
+        # loop over the symbols in the alphabet (for each state)
         for symbol in alphabet:
-            next_states = []
-            for nfa_state in current_state:
-                for x in delta_dict[nfa_state][symbol]:
-                    if x not in next_states:
-                        next_states.append(x)
-            next_states = sorted(next_states)
-            dfa_delta.append([current_state, symbol, next_states])
+            next_states = [] # create a list of the next states
+            for nfa_state in current_state: # loop over each element of the current state (important if the current state is made up of more than 1)
+                for x in delta_dict[nfa_state][symbol]: # loop over the transition table's new next states 
+                    if x not in next_states: # check if the new next state is not in the list of next states
+                        next_states.append(x) # add the new next state to the list of next states
+            next_states = sorted(next_states) # sort the next states
+            dfa_delta.append([current_state, symbol, next_states]) # add (current state - symbol - next state) to the transition table
+            
             # globalOutput += print_to_string('Symbol: ', symbol, ' States: ', next_states)
+            
+            # concatenate the next state corresponding to each input symbol to the global output, to be displayed in GUI
             globalOutput += 'When input = ' + ', '.join(f'{w}' for w in symbol) + ', Go to : {' + ', '.join(
                 f'{w}' for w in next_states) + '}\n'
 
+            # check if next state has not been previously handled
             if next_states not in dfa_states:
-                dfa_states.append(next_states)
-                new_dfa_states.append(next_states)
-        globalOutput += '\n'
+                dfa_states.append(next_states) # add next state to dfa state
+                new_dfa_states.append(next_states) # add next state to new dfa state 
+        
+        globalOutput += '\n' # concatenate a new line, to be displayed in GUI
 
-    globalOutput += 'DFA Q = { '
+    globalOutput += 'DFA Q = { ' 
     globalOutput += ', '.join(f'{w}' for w in dfa_states)
     globalOutput += ' }\n\n'
+    
     # globalOutput += print_to_string('\n')
+    
     output2 = []
     for temp in dfa_delta:
         for elem in temp:
@@ -220,10 +241,11 @@ def convert_nfa_to_dfa():
                 dot.node(name, name, shape='doublecircle')
 
     var.set(globalOutput)
+    
     # dot.render(filename='gv_dfa.gv', view=True)
 
 
-# GUI
+# GUI code
 root = Tk()
 root.geometry(str(1000) + "x" + str(400))
 root.title("NFA to DFA - ASU Final Automata Course Project")
@@ -255,6 +277,7 @@ convertBtn = Button(root, text="Convert", width=30, height=2, font=("Montserrat"
 convertBtn.grid(column=1, row=12, columnspan=3, sticky="w", padx=10, pady=10)
 
 # divider1 = Label(root, text="")
+
 var = StringVar()
 var.set('-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n')
 Label(root,
