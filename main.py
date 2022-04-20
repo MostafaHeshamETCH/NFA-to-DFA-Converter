@@ -5,20 +5,23 @@
 # Initial Comment TBC
 #
 
+# imports
 from graphviz import Digraph
 from pprint import pprint, pformat
 from tkinter import *
 import io
 
-# global variables to be read from GUI
+# global variables to be read from GUI (states, initial state, alphabet, final state, transition function)
 statesString = ''
 startStateString = ''
 alphabetString = ''
 finalStatesString = ''
 deltaString = ''
+
+# global variable to hold the final output to be displayed in GUI
 globalOutput = ''
 
-
+# 
 def print_to_string(*args, **kwargs) -> str:
     output = io.StringIO()
     print(*args, file=output, **kwargs)
