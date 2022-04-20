@@ -21,16 +21,18 @@ deltaString = ''
 # global variable to hold the final output to be displayed in GUI
 globalOutput = ''
 
-# 
-def print_to_string(*args, **kwargs) -> str:
-    output = io.StringIO()
-    print(*args, file=output, **kwargs)
-    contents = output.getvalue()
-    output.close()
-    return contents
+################
 
+# def print_to_string(*args, **kwargs) -> str:
+#    output = io.StringIO()
+#    print(*args, file=output, **kwargs)
+#    contents = output.getvalue()
+#    output.close()
+#    return contents
 
-# ----- INPUT ------
+################
+
+# ----- HARDCODED INPUT # 1 ------
 
 # Q = [ 'A', 'B', 'C']
 
@@ -49,44 +51,55 @@ def print_to_string(*args, **kwargs) -> str:
 
 ################
 
-Q = ['A', 'B', 'C', 'D']
+# ----- HARDCODED INPUT # 2 ------
 
-q0 = 'A'
+# Q = ['A', 'B', 'C', 'D']
 
-alphabet = ['0', '1']
+# q0 = 'A'
 
-delta = [
-    ['A', '0', 'A'],
-    ['A', '1', 'B'],
-    ['A', '1', 'A'],
-    ['B', '0', 'C'],
-    ['B', '1', 'C'],
-    ['C', '0', 'D'],
-    ['C', '1', 'D'],
-]
+# alphabet = ['0', '1']
 
-F = ['D']
+# delta = [
+#    ['A', '0', 'A'],
+#    ['A', '1', 'B'],
+#    ['A', '1', 'A'],
+#    ['B', '0', 'C'],
+#    ['B', '1', 'C'],
+#    ['C', '0', 'D'],
+#    ['C', '1', 'D'],
+#]
+
+# F = ['D']
+
+################
 
 # preprocessing of input
-delta_dict = {}  # used as transition table for NFA where when given [State][Symbol] produces the next State
+delta_dict = {}  # used as the transition table for NFA; when given [State][Symbol] produces the next state
 
-for state in Q:  # fills the dictionary with States and Symbols only
-    delta_dict[state] = {}
-    for symbol in alphabet:
-        delta_dict[state][symbol] = []
+# fill the dictionary with states and symbols only
+for state in Q: # loop over all states
+    delta_dict[state] = {} # initialize the transition row for the state currently looping on
+    for symbol in alphabet: # loop over all symbols in the alphabet
+        delta_dict[state][symbol] = [] # initialize state-symbol pairs
 
-for transition in delta:  # fills each State and Symbol with its transitioned States
-    x, s, y = transition
-    delta_dict[x][s].append(y)
+# fill the dictionary with the transitioning states
+for transition in delta:  # loop over the transition function
+    x, s, y = transition # extract the state in x, the symbol in s, and the next state in y
+    delta_dict[x][s].append(y) # fill the dictionary of state x symbol s with the transitioned state y
 
-# Print NFA
+# print NFA
 pprint(delta_dict)
 print()
 
-# Final Graph Format Settings
+# final graph format settings, to be displayed seperate of the GUI
 dot = Digraph()
 dot.graph_attr['rankdir'] = 'LR'
 dot.node_attr['shape'] = 'circle'
+
+
+################
+
+# ----- HARDCODED INPUT # 1 ------
 
 
 # Q = [ 'A', 'B', 'C']
@@ -106,7 +119,10 @@ dot.node_attr['shape'] = 'circle'
 
 # F = ['C']
 
+################
 
+
+# 
 def convert_nfa_to_dfa():
     global statesString, startStateString, deltaString, alphabetString, finalStatesString, Q, q0, alphabet, delta, F, \
         globalOutput, var
