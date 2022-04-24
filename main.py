@@ -197,17 +197,20 @@ def convert_nfa_to_dfa():
         
         globalOutput += '\n' # concatenate a new line, to be displayed in GUI
 
+    # concatenate the DFA states to the global output, to be displayed in GUI
     globalOutput += 'DFA Q = { ' 
     globalOutput += ', '.join(f'{w}' for w in dfa_states)
     globalOutput += ' }\n\n'
     
     # globalOutput += print_to_string('\n')
-    
-    output2 = []
-    for temp in dfa_delta:
-        for elem in temp:
-            output2.append(elem)
+   
 
+    # output2 = []
+    # for temp in dfa_delta:
+    #    for elem in temp:
+    #        output2.append(elem)
+
+    # concatenate the DFA transition table (delta) to the global output, to be displayed in GUI
     globalOutput += 'DFA Delta = \n'
     globalOutput += pformat(dfa_delta)
 
@@ -215,8 +218,13 @@ def convert_nfa_to_dfa():
     # globalOutput += 'DFA Delta = \n'
     # globalOutput += ', '.join(f'{w}' for w in ('[' + str(item) + ']' for innerlist in output2 for item in innerlist))
 
+    # print global output to ensure it is correct
     print(globalOutput)
 
+    
+    ################
+    
+    
     # construct graph by dot (Graphviz)
     def stringify(state: list):
         return '{' + ','.join(state) + '}'
@@ -245,6 +253,9 @@ def convert_nfa_to_dfa():
     # dot.render(filename='gv_dfa.gv', view=True)
 
 
+################    
+    
+    
 # GUI code
 root = Tk()
 root.geometry(str(1000) + "x" + str(400))
