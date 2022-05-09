@@ -1,7 +1,10 @@
 # Conversion of epsilon-NFA to DFA and visualization using Graphviz
 
 from graphviz import Digraph
-from graphviz import Source
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+from tkinter import *
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 class NFA:
@@ -78,7 +81,7 @@ class NFA:
         closure_stack = [self.states_dict[state]]
 
         # While stack is not empty the loop will run
-        while (len(closure_stack) > 0):
+        while len(closure_stack) > 0:
 
             # Get the top of stack that will be evaluated now
             cur = closure_stack.pop(0)
@@ -142,7 +145,7 @@ nfa = NFA(
     # [from state, alphabet, to state]
 )
 
-# nfa = NFA.fromUser() # To get input from user
+# nfa = NFA.fromUser()  # To get input from user
 # print(repr(nfa)) # To print the quintuple in console
 
 # Making an object of Digraph to visualize NFA diagram
@@ -152,7 +155,7 @@ nfa.graph = Digraph()
 for x in nfa.states:
     # If state is not a final state, then border shape is single circle
     # Else it is double circle
-    if (x not in nfa.finals):
+    if x not in nfa.finals:
         nfa.graph.attr('node', shape='circle')
         nfa.graph.node(x)
     else:
@@ -264,40 +267,56 @@ while (len(dfa_stack) > 0):
 # Makes a pdf with name dfa.pdf and views the pdf
 dfa.render('dfa', view=False, format="png")
 
-# from tkinter import *
-#
-# root = Tk()
-# canvas = Canvas(root, width=500, height=200)
-# canvas.pack()
-# img1 = PhotoImage(file="nfa.png")
-# Label(
-#     root,
-#     image=img1
-# ).pack()
-# img2 = PhotoImage(file="dfa.png")
-# Label(
-#     root,
-#     image=img2
-# ).pack()
-# mainloop()
 
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+def convert():
+    # make new figure with 2 sub-figures
+    # each sub-figure can have an image in it
+    fig = plt.figure()
+    image1 = plt.subplot(121)
+    image2 = plt.subplot(122)
 
-# make new figure with 2 sub-figures
-# each sub-figure can have an image in it
-fig = plt.figure()
-image1 = plt.subplot(121)
-image2 = plt.subplot(122)
+    # read the image files (png files preferred)
+    img_source1 = mpimg.imread('nfa.png')
+    img_source2 = mpimg.imread('dfa.png')
+    # put the images into the window
+    _ = image1.imshow(img_source1)
+    _ = image2.imshow(img_source2)
 
-# read the image files (png files preferred)
-img_source1 = mpimg.imread('nfa.png')
-img_source2 = mpimg.imread('dfa.png')
-# put the images into the window
-_ = image1.imshow(img_source1)
-_ = image2.imshow(img_source2)
+    # hide axis and show window with images
+    image1.axis("off")
+    image2.axis("off")
+    plt.show()
 
-# hide axis and show window with images
-image1.axis("off")
-image2.axis("off")
-plt.show()
+
+# GUI
+root = Tk()
+root.geometry(str(400) + "x" + str(300))
+root.title("NFA to DFA - ASU Final Automata Course Project")
+
+Label(root, text="Enter NFA to convert", font=("Montserrat", 18), fg='#ffffff').grid(column=1, row=1, padx=2, sticky="w")
+
+Label(root, text="States", font=("Montserrat", 12), fg='#f66666').grid(column=1, row=2, padx=2, sticky="w")
+setOfStatesInput = Entry(root, width=15, justify="left", bg='#f0f0f0')
+setOfStatesInput.grid(column=2, row=2, padx=2, sticky="w")
+
+Label(root, text="Start State", font=("Montserrat", 12), fg='#f66666').grid(column=1, row=4, padx=2, sticky="w")
+startStateInput = Entry(root, width=5, justify="left", bg='#f0f0f0')
+startStateInput.grid(column=2, row=4, padx=2, sticky="w")
+
+Label(root, text="Final State", font=("Montserrat", 12), fg='#f66666').grid(column=1, row=6, padx=2, sticky="w")
+finalStatesInput = Entry(root, width=5, justify="left", bg='#f0f0f0')
+finalStatesInput.grid(column=2, row=6, padx=2, sticky="w")
+
+Label(root, text="Alphabet", font=("Montserrat", 12), fg='#f66666').grid(column=1, row=8, padx=2, sticky="w")
+alphabetInput = Entry(root, width=5, justify="left", bg='#f0f0f0')
+alphabetInput.grid(column=2, row=8, padx=2, sticky="w")
+
+Label(root, text="Delta", font=("Montserrat", 12), fg='#f66666').grid(column=1, row=10, padx=2, sticky="w")
+deltaInput = Entry(root, width=15, justify="left", bg='#f0f0f0')
+deltaInput.grid(column=2, row=10, padx=2, sticky="w")
+
+convertBtn = Button(root, text="Convert", width=30, height=2, font=("Montserrat", 10),
+                    command=lambda: convert())
+convertBtn.grid(column=1, row=12, columnspan=3, sticky="w", padx=10, pady=10)
+
+root.mainloop()
