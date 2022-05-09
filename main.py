@@ -209,7 +209,7 @@ root = Tk()
 root.geometry(str(1000) + "x" + str(400))
 root.title("NFA to DFA - ASU Final Automata Course Project")
 
-Label(root, text="Enter NFA to covert", font=("Montserrat", 18), fg='#000000').grid(column=1, row=1, padx=2, sticky="w")
+Label(root, text="Enter NFA to convert", font=("Montserrat", 18), fg='#000000').grid(column=1, row=1, padx=2, sticky="w")
 
 Label(root, text="States", font=("Montserrat", 12), fg='#666666').grid(column=1, row=2, padx=2, sticky="w")
 setOfStatesInput = Entry(root, width=15, justify="left", bg='#f0f0f0')
