@@ -5,94 +5,55 @@
 # Initial Comment TBC
 #
 
+# imports
 from graphviz import Digraph
 from pprint import pprint, pformat
 from tkinter import *
 import io
 
-# global variables to be read from GUI
+# global variables to be read from GUI (states, initial state, alphabet, final state, transition function)
 statesString = ''
 startStateString = ''
 alphabetString = ''
 finalStatesString = ''
 deltaString = ''
+
+# global variable to hold the final output to be displayed in GUI
 globalOutput = ''
-
-
-def print_to_string(*args, **kwargs) -> str:
-    output = io.StringIO()
-    print(*args, file=output, **kwargs)
-    contents = output.getvalue()
-    output.close()
-    return contents
-
-
-# ----- INPUT ------
-
-# Q = [ 'A', 'B', 'C']
-
-# q0 = 'A'
-
-# alphabet = ['0', '1']
-
-# delta = [
-#     ['A', '0', 'A'],
-#     ['A', '1', 'A'],
-#     ['A', '0', 'B'],
-#     ['B', '1', 'C']
-# ]
-
-# F = ['C']
 
 ################
 
-Q = ['A', 'B', 'C', 'D']
+# ----- HARDCODED INPUT # 1 ------
 
-q0 = 'A'
+allStates = ['A', 'B', 'C', 'D']
 
-alphabet = ['0', '1']
+qNode = 'A'
 
-delta = [
-    ['A', '0', 'A'],
-    ['A', '1', 'B'],
-    ['A', '1', 'A'],
-    ['B', '0', 'C'],
-    ['B', '1', 'C'],
-    ['C', '0', 'D'],
-    ['C', '1', 'D'],
+inputSymbols = ['0', '1']
+
+transitionTable = [
+   ['A', '0', 'A'],
+   ['A', '1', 'B'],
+   ['A', '1', 'A'],
+   ['B', '0', 'C'],
+   ['B', '1', 'C'],
+   ['C', '0', 'D'],
+   ['C', '1', 'D'],
 ]
 
-F = ['D']
+qFinal = ['D']
 
-# preprocessing of input
-delta_dict = {}  # used as transition table for NFA where when given [State][Symbol] produces the next State
+################
 
-for state in Q:  # fills the dictionary with States and Symbols only
-    delta_dict[state] = {}
-    for symbol in alphabet:
-        delta_dict[state][symbol] = []
+# ----- HARDCODED INPUT # 2 ------
 
-for transition in delta:  # fills each State and Symbol with its transitioned States
-    x, s, y = transition
-    delta_dict[x][s].append(y)
-
-# Print NFA
-pprint(delta_dict)
-print()
-
-# Final Graph Format Settings
-dot = Digraph()
-dot.graph_attr['rankdir'] = 'LR'
-dot.node_attr['shape'] = 'circle'
-
-
-# Q = [ 'A', 'B', 'C']
-
-# q0 = 'A'
-
-# alphabet = ['0', '1']
-
-# delta = [
+# allStates = [ 'A', 'B', 'C' ]
+#
+# qNode = 'A'
+#
+# inputSymbols = ['0', '1']
+#
+# transitionTable = [
 #     ['A', '0', 'A'],
 #     ['A', '1', 'A'],
 #     ['A', '0', 'B'],
@@ -101,110 +62,121 @@ dot.node_attr['shape'] = 'circle'
 
 # A,0,A|A,1,A|A,0,B|B,1,C
 
-# F = ['C']
+# qFinal = ['C']
 
+################
 
+# preprocessing of input
+dfaTransitionTable = {}  # used as the transition table for NFA; when given [State][Symbol] produces the next state
+
+# print NFA
+pprint(dfaTransitionTable)
+print()
+
+################
+
+# function to convert an NFA to a DFA
 def convert_nfa_to_dfa():
-    global statesString, startStateString, deltaString, alphabetString, finalStatesString, Q, q0, alphabet, delta, F, \
+    # previously defined variables
+    global statesString, startStateString, deltaString, alphabetString, finalStatesString, allStates, qNode, inputSymbols, transitionTable, qFinal, \
         globalOutput, var
 
+    allStates = []
+    qNode = ''
+    inputSymbols = []
+    transitionTable.clear()
+    qFinal = ''
+
+    # mapping the strings to the content of the input from the GUI
     statesString = setOfStatesInput.get()
     startStateString = startStateInput.get()
     alphabetString = alphabetInput.get()
     finalStatesString = finalStatesInput.get()
     deltaString = deltaInput.get()
 
-    Q = statesString.split(',')
-    q0 = startStateString
-    alphabet = alphabetString.split(',')
-    F = finalStatesString.split(',')
-    delta = [list(line.split(',')) for line in deltaString.split('|')]
-    # Algorithm NFA to DFA
-    dfa_states = [[q0]]
-    dfa_delta = []
-    new_dfa_states = [[q0]]
+    # transform strings into arrays
+    allStates = statesString.split(',')
+    qNode = startStateString
+    inputSymbols = alphabetString.split(',')
+    qFinal = finalStatesString.split(',')
+    transitionTable = [list(line.split(',')) for line in deltaString.split('|')]
 
-    #                    new_dfa_states |    Symbol1 (0)   |    Symbol2 (1)   |  ...etc
+    # fill the transition table with states and symbols only
+    for q in allStates:  # loop over all states
+        dfaTransitionTable[q] = {}  # initialize the transition row for the state currently looping on
+        for input in inputSymbols:  # loop over all symbols in the alphabet
+            dfaTransitionTable[q][input] = []  # initialize state-symbol pairs
+
+    # fill the dictionary with the transitioning states
+    for t in transitionTable:  # loop over the transition function
+        cs, a, ns = t  # extract the state in cs, the symbol in a, and the next state in ns
+        dfaTransitionTable[cs][a].append(ns)  # fill the dictionary of state cs symbol a with the transitioned state ns
+
+    ################
+
+    # Algorithm NFA to DFA
+
+    # new arrays for current state, new transition function and new dfa states
+    dfaStates = [[qNode]]
+    newDFATransitionTable = []
+    tempDFAStates = [[qNode]]
+
+    #                     tempDFAStates |    Symbol1 (0)   |    Symbol2 (1)   |  ...etc
     #                  -------------------------------------------------------------------
-    #   current_state ->       q0       |         x        |         y        |
+    #  currentDFAState ->       q0       |        ns1       |         ns2      |
     #                                   |                  |                  |
     #                                   |                  |                  |
     #                                   |                  |                  |
     #
-    #  x & y determined by the pre-defined dictionary as following
-    #      delta_dict[current_state][symbol]   -> current_state could be more than one state like {A,B} so it's iterated
-    #      upon all its elements
+    #  ns & y determined by the pre-defined dictionary as follows
+    #      delta_dict[currentDFAState][input]   -> currentDFAState could be more than one state like {A,B}
+    #      so it's iterated upon all its elements
 
-    while len(new_dfa_states) > 0:
-        current_state = new_dfa_states[0]  #
-        new_dfa_states = new_dfa_states[1:]
+    # loop over all new dfa states, row by row
+    while len(tempDFAStates) > 0:
+        currentDFAState = tempDFAStates[0]  # current state is the first dfa state
+        tempDFAStates = tempDFAStates[1:]  # remove the first state from the temporary dfa state
 
-        # globalOutput += print_to_string('Current state: ', current_state)
-        globalOutput += 'Current state: ' + '{' + ', '.join(f'{w}' for w in current_state) + '}' + '\n'
+        # concatenate the current state to the global output, to be displayed in GUI
+        globalOutput += 'Current state: ' + '{' + ', '.join(f'{w}' for w in currentDFAState) + '}' + '\n'
 
-        for symbol in alphabet:
-            next_states = []
-            for nfa_state in current_state:
-                for x in delta_dict[nfa_state][symbol]:
-                    if x not in next_states:
-                        next_states.append(x)
-            next_states = sorted(next_states)
-            dfa_delta.append([current_state, symbol, next_states])
-            # globalOutput += print_to_string('Symbol: ', symbol, ' States: ', next_states)
-            globalOutput += 'When input = ' + ', '.join(f'{w}' for w in symbol) + ', Go to : {' + ', '.join(
-                f'{w}' for w in next_states) + '}\n'
+        # loop over the symbols in the alphabet (for each state)
+        for input in inputSymbols:
+            followingState = []  # create a list of the next states (for union between multiple states)
+            for singleState in currentDFAState:  # loop over each element of the current state (important if the current state is made up of more than 1)
+                for ns in dfaTransitionTable[singleState][input]:  # loop over the transition table's next states
+                    if ns not in followingState:  # check if ns is not already in the list of next states
+                        followingState.append(ns)  # add the new next state to the list of next states
+            newDFATransitionTable.append([currentDFAState, input, followingState])  # add (current state - input - following state) to the transition table
+            # concatenate the next state corresponding to each input symbol to the global output, to be displayed in GUI
+            globalOutput += 'When input = ' + ', '.join(f'{w}' for w in input) + ', Go to : {' + ', '.join(
+                f'{w}' for w in followingState) + '}\n'
 
-            if next_states not in dfa_states:
-                dfa_states.append(next_states)
-                new_dfa_states.append(next_states)
-        globalOutput += '\n'
+            # check if next state has not been previously handled, as
+            if followingState not in dfaStates:
+                dfaStates.append(followingState)  # add next state to dfa state
+                tempDFAStates.append(followingState)  # add next state to new dfa state
 
+        globalOutput += '\n'  # concatenate a new line, to be displayed in GUI
+
+    # concatenate the DFA states to the global output, to be displayed in GUI
     globalOutput += 'DFA Q = { '
-    globalOutput += ', '.join(f'{w}' for w in dfa_states)
+    globalOutput += ', '.join(f'{w}' for w in dfaStates)
     globalOutput += ' }\n\n'
-    # globalOutput += print_to_string('\n')
-    output2 = []
-    for temp in dfa_delta:
-        for elem in temp:
-            output2.append(elem)
 
+    # concatenate the DFA transition table (delta) to the global output, to be displayed in GUI
     globalOutput += 'DFA Delta = \n'
-    globalOutput += pformat(dfa_delta)
+    globalOutput += pformat(newDFATransitionTable)
 
-    # print('dfa_delta')
-    # globalOutput += 'DFA Delta = \n'
-    # globalOutput += ', '.join(f'{w}' for w in ('[' + str(item) + ']' for innerlist in output2 for item in innerlist))
-
+    # print global output to ensure it is correct
     print(globalOutput)
 
-    # construct graph by dot (Graphviz)
-    def stringify(state: list):
-        return '{' + ','.join(state) + '}'
-
-    for state in dfa_states:
-        name = stringify(state)
-        dot.node(name, name)
-
-    for transition in dfa_delta:
-        x, s, y = transition
-        nameX = stringify(x)
-        nameY = stringify(y)
-        dot.edge(nameX, nameY, label=s)
-
-    dot.node('BEGIN', '', shape='none')
-    dot.edge('BEGIN', stringify([q0]), label='start')
-
-    for dfa_state in dfa_states:
-        for final_state in F:
-            if final_state in dfa_state:
-                name = stringify(dfa_state)
-                dot.node(name, name, shape='doublecircle')
-
     var.set(globalOutput)
-    # dot.render(filename='gv_dfa.gv', view=True)
+
+################
 
 
-# GUI
+# GUI code
 root = Tk()
 root.geometry(str(1000) + "x" + str(400))
 root.title("NFA to DFA - ASU Final Automata Course Project")
@@ -236,6 +208,7 @@ convertBtn = Button(root, text="Convert", width=30, height=2, font=("Montserrat"
 convertBtn.grid(column=1, row=12, columnspan=3, sticky="w", padx=10, pady=10)
 
 # divider1 = Label(root, text="")
+
 var = StringVar()
 var.set('-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n-\n')
 Label(root,
@@ -253,3 +226,4 @@ Label(root,
                          )
 
 root.mainloop()
+
