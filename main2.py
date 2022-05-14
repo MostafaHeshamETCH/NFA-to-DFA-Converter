@@ -11,105 +11,105 @@ alphabetString = ''
 finalStatesString = ''
 deltaString = ''
 
-#Creating the NFA Class that will include the NFA Transition Table
+
+# Creating the NFA Class that will include the NFA Transition Table
 class NFA:
-    #Constructor of the class to identify the quintuple of the NFA
-    def __init__(self, no_state, states, no_alphabet, alphabets, start,
-                 no_final, finals, no_transition, transitions):
-        self.no_state = no_state
-        self.states = states
-        self.no_alphabet = no_alphabet
+    # Constructor of the class to identify the quintuple of the NFA
+    def __init__(self, numOfStates, qStates, numOfAlphabet, alphabets, startState,
+                 numOfFinalStates, finalStates, numOfAllTransitions, allTransitions):
+        self.numOfStates = numOfStates
+        self.qStates = qStates
+        self.numOfAlphabet = numOfAlphabet
         self.alphabets = alphabets
 
         # Adding epsilon alphabet to the list
         # and incrementing the alphabet count
         self.alphabets.append('e')
-        self.no_alphabet += 1
-        #Identifying the start state
-        self.start = start
-        #Identifying the number of final states. 
-        self.no_final = no_final
-        #Identifying the final transition states. 
-        self.finals = finals
-        #Identifying the number of transitions
-        self.no_transition = no_transition
-        #Identifying the transition symbols
-        self.transitions = transitions
+        self.numOfAlphabet += 1
+        # Identifying the start state
+        self.startState = startState
+        # Identifying the number of final states.
+        self.numOfFinalStates = numOfFinalStates
+        # Identifying the final transition states.
+        self.finalStates = finalStates
+        # Identifying the number of transitions
+        self.numOfAllTransitions = numOfAllTransitions
+        # Identifying the transition symbols
+        self.allTransitions = allTransitions
         self.graph = Digraph()
 
-        #The following dictionary is used to store the indexes of the states
-        self.states_dict = dict()
-        for i in range(self.no_state):
-            self.states_dict[self.states[i]] = i
-        #The following dictionary is used to store the indexes of the alphabets
-        self.alphabets_dict = dict()
-        for i in range(self.no_alphabet):
-            self.alphabets_dict[self.alphabets[i]] = i
+        # The following dictionary is used to store the indexes of the states
+        self.statesDict = dict()
+        for i in range(self.numOfStates):
+            self.statesDict[self.qStates[i]] = i
+        # The following dictionary is used to store the indexes of the alphabets
+        self.alphabetsDict = dict()
+        for i in range(self.numOfAlphabet):
+            self.alphabetsDict[self.alphabets[i]] = i
 
-        # The following dictionary is used for creating the transition table in the follownig format: 
+        # The following dictionary is used for creating the transition table in the follownig format:
         # [From State + Alphabet pair] -> [Set of To States]
-        self.transition_table = dict()
-        #This for loop gets the first part of the format: [From State + Alphabet pair]
-        for i in range(self.no_state):
-            for j in range(self.no_alphabet):
-                self.transition_table[str(i) + str(j)] = []
-        #This for loop gets the first part of the format: [Set of To States]
-        for i in range(self.no_transition):
-            self.transition_table[str(self.states_dict[self.transitions[i][0]])
-                                  + str(self.alphabets_dict[
-                                            self.transitions[i][1]])].append(
-                self.states_dict[self.transitions[i][2]])
-    # Function that prints the NFA quintuple to the user in the following form: 
+        self.transitionsTable = dict()
+        # This for loop gets the first part of the format: [From State + Alphabet pair]
+        for i in range(self.numOfStates):
+            for j in range(self.numOfAlphabet):
+                self.transitionsTable[str(i) + str(j)] = []
+        # This for loop gets the first part of the format: [Set of To States]
+        for i in range(self.numOfAllTransitions):
+            self.transitionsTable[str(self.statesDict[self.allTransitions[i][0]])
+                                  + str(self.alphabetsDict[
+                                            self.allTransitions[i][1]])].append(
+                self.statesDict[self.allTransitions[i][2]])
+
+    # Function that prints the NFA quintuple to the user in the following form:
     # Q: states
     # Σ: alphabets
     # q0: Start state
     # F: Final State
     # δ: transition table
     def __repr__(self):
-        return "Q : " + str(self.states) + "\nΣ : "
+        return "Q : " + str(self.qStates) + "\nΣ : "
         + str(self.alphabets) + "\nq0 : "
-        + str(self.start) + "\nF : " + str(self.finals) + \
-        "\nδ : \n" + str(self.transition_table)
+        + str(self.startState) + "\nF : " + str(self.finalStates) + \
+        "\nδ : \n" + str(self.transitionsTable)
 
-    # Function to perform epsilon closure of a state in the NFA that has epsilon as a transition symbol. 
+    # Function to perform epsilon closure of a state in the NFA that has epsilon as a transition symbol.
     def getEpsilonClosure(self, state):
-        #This dictionary will be used to store all the visited states to avoid repitions. 
+        # This dictionary will be used to store all the visited states to avoid repitions.
         closure = dict()
-        closure[self.states_dict[state]] = 0
-        #This stack is used to get the next state to be visited
-        closure_stack = [self.states_dict[state]]
+        closure[self.statesDict[state]] = 0
+        # This stack is used to get the next state to be visited
+        closureStack = [self.statesDict[state]]
 
-        # Check the capacity of the stack, if not empty execute the code inside. 
-        while len(closure_stack) > 0:
-
-            # Store the top of the stack in a variable to be examined. 
-            #The top of the stack represents the current visited state. 
-            cur = closure_stack.pop(0)
-            #Loop on the states that have epsilon as an input symbol
-            for x in self.transition_table[str(cur) + str(self.alphabets_dict['e'])]:
-                #Check if this state is not already visited before
+        # Check the capacity of the stack, if not empty execute the code inside.
+        while len(closureStack) > 0:
+            # Store the top of the stack in a variable to be examined.
+            # The top of the stack represents the current visited state.
+            cur = closureStack.pop(0)
+            # Loop on the states that have epsilon as an input symbol
+            for x in self.transitionsTable[str(cur) + str(self.alphabetsDict['e'])]:
+                # Check if this state is not already visited before
                 if x not in closure.keys():
-                    #add the state to the dictionary
+                    # add the state to the dictionary
                     closure[x] = 0
-                    #push the current state to the stack
-                    closure_stack.append(x)
+                    # push the current state to the stack
+                    closureStack.append(x)
             closure[cur] = 1
         return closure.keys()
 
-    
     # A Function to return the name from set of states to display in the DFA diagram
     def getStateName(self, state_list):
         name = ''
         for x in state_list:
-            name += self.states[x]
+            name += self.qStates[x]
         return name
 
-    #Function that identifies the final states in the DFA Diagram according to the number
-    # of final states in NFA. 
+    # Function that identifies the final states in the DFA Diagram according to the number
+    # of final states in NFA.
     def isFinalDFA(self, state_list):
         for x in state_list:
-            for y in self.finals:
-                if x == self.states_dict[y]:
+            for y in self.finalStates:
+                if x == self.statesDict[y]:
                     return True
         return False
 
@@ -117,11 +117,6 @@ class NFA:
 def convert():
     print("Start Conversion")
     global statesString, startStateString, deltaString, alphabetString, finalStatesString
-
-    allStates = []
-    qNode = ''
-    inputSymbols = []
-    qFinal = ''
 
     # mapping the strings to the content of the input from the GUI
     statesString = setOfStatesInput.get()
@@ -147,7 +142,6 @@ def convert():
         qFinal,  # array of final states
         len(transitionTable),  # number of transitions
         transitionTable,
-
         # array of transitions with its element of type :
         # [from state, alphabet, to state]
     )
@@ -155,13 +149,13 @@ def convert():
     nfa.graph = Digraph()
 
     # Creating the States in the NFA Diagram
-    for x in nfa.states:
-        #This if condition is used for displaying the circles in the diagram: 
-        #if the state is not a final state --> display it with a single circle. 
-        if x not in nfa.finals:
+    for x in nfa.qStates:
+        # This if condition is used for displaying the circles in the diagram:
+        # if the state is not a final state --> display it with a single circle.
+        if x not in nfa.finalStates:
             nfa.graph.attr('node', shape='circle')
             nfa.graph.node(x)
-        #if the state is a final state --> display it with double circles. 
+        # if the state is a final state --> display it with double circles.
         else:
             nfa.graph.attr('node', shape='doublecircle')
             nfa.graph.node(x)
@@ -169,106 +163,106 @@ def convert():
     # Creating the pointing arrow to the start state in NFA Diagram
     nfa.graph.attr('node', shape='none')
     nfa.graph.node('')
-    nfa.graph.edge('', nfa.start)
+    nfa.graph.edge('', nfa.startState)
 
-    #Create the edges between the states from the transitions array. 
-    for x in nfa.transitions:
+    # Create the edges between the states from the transitions array.
+    for x in nfa.allTransitions:
         nfa.graph.edge(x[0], x[2], label=('ε', x[1])[x[1] != 'e'])
 
-    #Generates a pdf that visualizes the NFA Diagram
+    # Generates a pdf that visualizes the NFA Diagram
     nfa.graph.render('nfa', view=False, format="png")
 
     # Making an object of Digraph to visualize DFA diagram
     dfa = Digraph()
 
-    #Calling the function that performs the epsilon closure. 
+    # Calling the function that performs the epsilon closure.
     epsilon_closure = dict()
-    for x in nfa.states:
+    for x in nfa.qStates:
         epsilon_closure[x] = list(nfa.getEpsilonClosure(x))
 
     # The epsilon closure of the start state of the NFA will be the first state in the DFA.
-    dfa_stack = list()
-    #The previous list is created to store the states until the current is finished converting from NFA to DFA.
-    dfa_stack.append(epsilon_closure[nfa.start])
+    dfaSavedStack = list()
+    # The previous list is created to store the states until the current is finished converting from NFA to DFA.
+    dfaSavedStack.append(epsilon_closure[nfa.startState])
 
-    # Condition that checks if the start state is also a final state. 
-    if nfa.isFinalDFA(dfa_stack[0]):
+    # Condition that checks if the start state is also a final state.
+    if nfa.isFinalDFA(dfaSavedStack[0]):
         dfa.attr('node', shape='doublecircle')
     else:
         dfa.attr('node', shape='circle')
-    dfa.node(nfa.getStateName(dfa_stack[0]))
+    dfa.node(nfa.getStateName(dfaSavedStack[0]))
 
     # Identify the DFA start state by drawing an arrow
     dfa.attr('node', shape='none')
     dfa.node('')
-    dfa.edge('', nfa.getStateName(dfa_stack[0]))
+    dfa.edge('', nfa.getStateName(dfaSavedStack[0]))
 
     # Create a list to keep track of DFA states
-    dfa_states = list()
-    dfa_states.append(epsilon_closure[nfa.start])
+    dfaStates = list()
+    dfaStates.append(epsilon_closure[nfa.startState])
 
     # The conversion will keep running until the array that stores the DFA states is empty
-    while len(dfa_stack) > 0:
-        #Popping the stack state after the other and storing it into a variable to 
-        #start making the conversion for that state. 
-        cur_state = dfa_stack.pop(0)
+    while len(dfaSavedStack) > 0:
+        # Popping the stack state after the other and storing it into a variable to
+        # start making the conversion for that state.
+        currentState = dfaSavedStack.pop(0)
 
-        # Loop over all the alphabets for the states stored in the cur_state variable
-        #to get the corresponding transitions of those states in the DFA
-        for al in range(nfa.no_alphabet - 1):
+        # Loop over all the alphabets for the states stored in the currentState variable
+        # to get the corresponding transitions of those states in the DFA
+        for al in range(nfa.numOfAlphabet - 1):
             # A set to check if the epsilon closure of the current state is empty or not
-            from_closure = set()
-            for x in cur_state:
-                #Perform union operation between the states found in the epsilon closure of the current state.
-                from_closure.update(
-                    set(nfa.transition_table[str(x) + str(al)]))
+            closureOutput = set()
+            for x in currentState:
+                # Perform union operation between the states found in the epsilon closure of the current state.
+                closureOutput.update(
+                    set(nfa.transitionsTable[str(x) + str(al)]))
 
-            #Condition to ensure that the epsilon closure of the new set is not empty.
-            if len(from_closure) > 0:
-                #Create a set to store the states the current state will be transitioned to.
-                to_state = set()
-                for x in list(from_closure):
-                    to_state.update(set(epsilon_closure[nfa.states[x]]))
+            # Condition to ensure that the epsilon closure of the new set is not empty.
+            if len(closureOutput) > 0:
+                # Create a set to store the states the current state will be transitioned to.
+                toState = set()
+                for x in list(closureOutput):
+                    toState.update(set(epsilon_closure[nfa.qStates[x]]))
 
-                #Check if the to state already exists in DFA and if not then add it
-                if list(to_state) not in dfa_states:
-                    dfa_stack.append(list(to_state))
-                    dfa_states.append(list(to_state))
+                # Check if the to state already exists in DFA and if not then add it
+                if list(toState) not in dfaStates:
+                    dfaSavedStack.append(list(toState))
+                    dfaStates.append(list(toState))
 
                     # This consition checks if this state is a final state or not
                     # in order to identify if it should be surrounded by double circles or
-                    # a single circle. 
-                    if nfa.isFinalDFA(list(to_state)):
+                    # a single circle.
+                    if nfa.isFinalDFA(list(toState)):
                         dfa.attr('node', shape='doublecircle')
                     else:
                         dfa.attr('node', shape='circle')
-                    dfa.node(nfa.getStateName(list(to_state)))
+                    dfa.node(nfa.getStateName(list(toState)))
 
-                #Draw an edge from the current state to the corresponding to state. 
-                dfa.edge(nfa.getStateName(cur_state),
-                         nfa.getStateName(list(to_state)),
+                # Draw an edge from the current state to the corresponding to state.
+                dfa.edge(nfa.getStateName(currentState),
+                         nfa.getStateName(list(toState)),
                          label=nfa.alphabets[al])
 
-            #Else, the current state has an empty epsilon closure, then it 
+            # Else, the current state has an empty epsilon closure, then it
             # will be represented as a phi (ϕ) state.
             else:
 
                 # Condition to make sure there weren't any dead states present
-                #before this one. 
+                # before this one.
                 # 1- if there wasn't any phi state beofre then we create a new one
-                if (-1) not in dfa_states:
+                if (-1) not in dfaStates:
                     dfa.attr('node', shape='circle')
                     dfa.node('ϕ')
 
                     # The phi state will have all transitions looping on itself.
-                    for alpha in range(nfa.no_alphabet - 1):
+                    for alpha in range(nfa.numOfAlphabet - 1):
                         dfa.edge('ϕ', 'ϕ', nfa.alphabets[alpha])
 
                     # Adding -1 to list to mark that dead state is present
-                    dfa_states.append(-1)
+                    dfaStates.append(-1)
 
-                #2- Else, we add this current state to the phi state.
-                dfa.edge(nfa.getStateName(cur_state, ),
+                # 2- Else, we add this current state to the phi state.
+                dfa.edge(nfa.getStateName(currentState, ),
                          'ϕ', label=nfa.alphabets[al])
 
     # Generates a pdf and opens the DFA diagram.
@@ -297,7 +291,8 @@ root = Tk()
 root.geometry(str(400) + "x" + str(300))
 root.title("NFA to DFA - ASU Final Automata Course Project")
 
-Label(root, text="Enter NFA to convert", font=("Montserrat", 18), fg='#000000').grid(column=1, row=1, padx=2, sticky="w")
+Label(root, text="Enter NFA to convert", font=("Montserrat", 18), fg='#000000').grid(column=1, row=1, padx=2,
+                                                                                     sticky="w")
 
 Label(root, text="States", font=("Montserrat", 12), fg='#f66666').grid(column=1, row=2, padx=2, sticky="w")
 setOfStatesInput = Entry(root, width=15, justify="left", bg='#f0f0f0')
